@@ -367,6 +367,12 @@ h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif;margin:0}
 .petName{font-family:Fredoka;font-weight:700;font-size:22px;color:#b0207a}
 @media (max-height:500px){.petBars .pb{min-width:84px;padding:2px 8px 2px 4px}.petBars .pb span{font-size:18px}}
 
+/* bichinho ao lado da boneca nas telas */
+.petBuddy{position:absolute;bottom:3%;z-index:2;filter:drop-shadow(0 8px 10px rgba(60,20,100,.25));animation:petIdle 4.5s ease-in-out infinite;transform-origin:50% 100%;cursor:pointer;touch-action:manipulation}
+.petBuddy.hop{animation:petHop .55s ease-out}
+@keyframes petIdle{0%,80%,100%{transform:translateY(0)}86%{transform:translateY(-14%) rotate(-3deg)}92%{transform:translateY(0) scaleY(.96)}}
+@keyframes petHop{0%{transform:translateY(0)}40%{transform:translateY(-30%) rotate(4deg)}75%{transform:translateY(0) scaleY(.92)}100%{transform:none}}
+
 </style>
 </head>
 <body>
@@ -1138,7 +1144,7 @@ $('#gRepeat').onclick=ask;$('#gClose').onclick=()=>{$('#game').classList.remove(
 /* ==== 14_scene_show.js ==== */
 /* =================== SHOW =================== */
 let showing=false;
-async function openShow(){if(showing)return;showing=true;$('#showImg').src=Wardrobe.dataURL();const prev=screen;$$('.screen').forEach(s=>s.classList.remove('on'));$('#show').classList.add('on');screen='show';
+async function openShow(){if(showing)return;showing=true;$('#showImg').src=Wardrobe.dataURL();if(typeof Pet!=='undefined')Pet.dom($('#show'),88);const prev=screen;$$('.screen').forEach(s=>s.classList.remove('on'));$('#show').classList.add('on');screen='show';
   $('#showText').textContent='3…';say('Preparada? Um, dois, três!','Ready? One, two, three!');await wait(900);$('#showText').textContent='2…';await wait(800);$('#showText').textContent='1…';await wait(800);
   $('#showText').textContent='🎶 '+(ST.name||'Estrela Pop')+' 🎶';song();const iv=setInterval(()=>confetti(['💖','⭐','✨','🎵','🎶'],5),650);
   await wait(7800);clearInterval(iv);SFX.applause();confetti(['💖','⭐','✨'],40);$('#showText').textContent='Você é uma estrela! ⭐';say('Você é uma estrela'+nm()+'!','You are a superstar!');addStar();
@@ -1592,7 +1598,7 @@ SFX.chirp=(v=.06)=>{const t=T();[0,.12,.24].forEach((d,i)=>tone(2400+i*300,t+d,.
 
 /* ==== 24_scene_salon.js ==== */
 /* =================== SALÃO =================== */
-const Salon={enter(){$('#salonAv').src=Wardrobe.dataURL();talk('Bem-vinda ao salão'+nm()+'! O que vamos fazer?','Welcome to the beauty salon!',true)}};
+const Salon={enter(){$('#salonAv').src=Wardrobe.dataURL();if(typeof Pet!=='undefined')Pet.dom($('#salonAv').parentElement,88);talk('Bem-vinda ao salão'+nm()+'! O que vamos fazer?','Welcome to the beauty salon!',true)}};
 $('#stHair').onclick=()=>{go('studio');setTimeout(()=>selectFaceTab('hair'),120)};
 
 /* ==== 25_scene_mall.js ==== */
@@ -1640,7 +1646,7 @@ const Mall={tab:'outfit',cv:null,ctx:null,dirty:true,spinT:0,
     g=c.createRadialGradient(w/2,h*.45,10,w/2,h*.45,h*.6);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,w,h);
     c.fillStyle='rgba(255,255,255,.7)';c.beginPath();c.ellipse(w/2,h*.93,Math.min(w*.32,h*.22),h*.04,0,0,7);c.fill();
     const ah=h*.94,aw=ah/2;let sx=1;if(sp){sx=Math.cos((now-this.spinT)/900*Math.PI*2)}
-    c.save();c.translate(w/2,h*.93);c.rotate(Math.sin(now/1300)*.012);c.scale(sx||.02,1+Math.sin(now/480)*.006);c.drawImage(Wardrobe.cv,-aw/2,-ah*(1950/2048),aw,ah);c.restore()}};
+    c.save();c.translate(w/2,h*.93);c.rotate(Math.sin(now/1300)*.012);c.scale(sx||.02,1+Math.sin(now/480)*.006);c.drawImage(Wardrobe.cv,-aw/2,-ah*(1950/2048),aw,ah);c.restore();if(typeof Pet!=='undefined')Pet.beside(c,w/2,h*.93,ah*.92,now/1000,false)}};
 
 /* ==== 30_scene_hubs.js ==== */
 /* =====================================================================
@@ -1677,7 +1683,7 @@ const HUBS={
 const Hub={cur:'school',
   open(id){this.cur=id;go('hub')},
   enter(){const H=HUBS[this.cur];$('#hub').className='screen bgSoft on hub-'+this.cur;$('#hubT').innerHTML=`${H.t} <span style="color:#a294c0;font-size:16px">${H.en}</span>`;$('#hubSign').textContent=H.sign;
-    $('#hubAvImg').src=Wardrobe.dataURL();const box=$('#hubTiles');box.innerHTML='';
+    $('#hubAvImg').src=Wardrobe.dataURL();if(typeof Pet!=='undefined')Pet.dom($('.hubAv'),90);const box=$('#hubTiles');box.innerHTML='';
     H.tiles.forEach(t=>{const b=document.createElement('button');b.className='tile '+t.c;b.innerHTML=`<span class="ic">${t.ic}</span><b>${t.b}</b><small>${t.s}</small>`;b.onclick=()=>{A();SFX.tap();t.fn()};box.appendChild(b)});
     talk(H.greet[0].replace('!',nm()+'!'),H.greet[1],true)}};
 
@@ -2004,7 +2010,8 @@ GAMES.runway={t:'Desfile',en:'Fashion show',
     const t=Math.min(1,(now-this.t0)/4200),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,y=hz+(H1*.95-hz)*e,h=H1*(.32+.6*e),w=h/2,im=Wardrobe.cv;
     const bob=t<1?Math.abs(Math.sin(now/180))*h*.012:0,spin=t>=1&&now-this.t0<5600?Math.cos((now-this.t0-4200)/1400*Math.PI*2):1;
     x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(W1/2,y,w*.3,h*.02,0,0,7);x.fill();
-    if(im){x.save();x.translate(W1/2,y-bob);x.scale(spin||.02,1);x.drawImage(im,-w/2,-h*(1950/2048),w,h);x.restore()}},
+    if(im){x.save();x.translate(W1/2,y-bob);x.scale(spin||.02,1);x.drawImage(im,-w/2,-h*(1950/2048),w,h);x.restore()}
+    if(typeof Pet!=='undefined')Pet.beside(x,W1/2,y,h*.92,now/1000,t<1)},  /* o bichinho desfila junto */
   repeat(){const [pt,en]=this.lookText();say(pt,en)}};
 
 /* ---------------- ESTÚDIO DE FOTOS (palco) ---------------- */
@@ -2034,7 +2041,7 @@ GAMES.photo={t:'Estúdio de fotos',en:'Photo studio',
     const e=F==='hearts'?'💖':'⭐',s=m*.075;x.font=`${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.textAlign='center';x.textBaseline='middle';
     for(let px=s/2;px<W1;px+=s*1.1){x.fillText(e,px,s/2);x.fillText(e,px,H1-s/2)}for(let py=s*1.6;py<H1-s;py+=s*1.1){x.fillText(e,s/2,py);x.fillText(e,W1-s/2,py)}},
   compose(c,W1,H1){const x=c.getContext('2d');this.paint(x,W1,H1);const im=Wardrobe.cv;if(im){let h=H1*.94,y=H1*.97;if(this.zoom){h=H1*2.05;y=H1*1.95}const w=h/2;
-      x.fillStyle='rgba(0,0,0,.12)';if(!this.zoom){x.beginPath();x.ellipse(W1/2,y,w*.3,h*.02,0,0,7);x.fill()}x.save();x.translate(W1/2,y);if(this.flip)x.scale(-1,1);x.drawImage(im,-w/2,-h*(1950/2048),w,h);x.restore()}
+      x.fillStyle='rgba(0,0,0,.12)';if(!this.zoom){x.beginPath();x.ellipse(W1/2,y,w*.3,h*.02,0,0,7);x.fill()}x.save();x.translate(W1/2,y);if(this.flip)x.scale(-1,1);x.drawImage(im,-w/2,-h*(1950/2048),w,h);x.restore();if(!this.zoom&&typeof Pet!=='undefined'&&this.withPet!==false)Pet.beside(x,W1/2,y,h*.92,0,false,this.flip)}
     x.textAlign='center';x.textBaseline='middle';for(const s of this.stk){x.font=`${Math.min(W1,H1)*.1}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.fillText(s.e,s.x*W1,s.y*H1)}this.frame(x,W1,H1)},
   draw(){const cv=this.cv;if(!cv)return;const r=cv.getBoundingClientRect();if(!r.width)return;const d=Math.min(2,devicePixelRatio||1);cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);this.compose(cv,cv.width,cv.height)},
   async snap(){const c=mk(480,640);this.compose(c,480,640);flash('#phStage');SFX.sparkle();if(sayPhoto(await albumAdd(c.toDataURL('image/jpeg',.82))))addStar()},
@@ -2085,6 +2092,19 @@ const Pet={
     c.save();c.fillStyle='rgba(80,40,90,.16)';c.beginPath();c.ellipse(x,y,w*.36*(1-lift/(h*2)),h*.045,0,0,7);c.fill();
     c.translate(x,y-lift);c.rotate(rot);c.scale(flip*(1+sq*.04),br*(1-sq*.06));c.drawImage(im,-w/2,-h,w,h);c.restore();
     return{x:x-w/2,y:y-h-lift,w,h}}};
+
+/* bichinho ao lado da boneca em qualquer cena desenhada em canvas (vitrine da loja, desfile, estúdio de fotos) */
+Pet.beside=function(c,cx,footY,dollH,t,walking,flip){const p=Pet.cur();if(!p)return null;const h=dollH*p.h*1.15,x=cx-dollH*.36*(flip?-1:1);
+  const hop=walking?Math.abs(Math.sin(t*9))*dollH*.025:(t%5<.45?Math.sin(t%5/.45*Math.PI)*dollH*.05:0);
+  return Pet.draw(c,p.id,x,footY+dollH*.01,h,{t,hop,wig:walking?Math.sin(t*9)*.05:0,flip})};
+/* bichinho ao lado da imagem da boneca nas telas de HTML (casa, salão, palco, início) */
+Pet.dom=function(host,pct){if(!host)return;let el=host.querySelector(':scope > .petBuddy');const p=Pet.cur();
+  if(!p){if(el)el.remove();return}
+  if(!el){el=document.createElement('img');el.className='petBuddy';el.alt='';el.addEventListener('pointerdown',e=>{e.stopPropagation();A();const q=Pet.cur();if(!q)return;el.classList.remove('hop');void el.offsetWidth;el.classList.add('hop');SFX.pick();haptic(12);talk(q.voice[0]+' '+Pet.name(q.id)+'!',q.voice[1],true)});host.appendChild(el)}
+  if(el.dataset.id!==p.id){el.src=p.file;el.dataset.id=p.id}el.dataset.pct=pct;
+  const place=()=>{const H=host.clientHeight,W=host.clientWidth;if(!H)return;const dollH=H*pct/100,ph=dollH*p.h*1.15,im=Pet.img(p.id),pw=im&&im.height?ph*im.width/im.height:ph;
+    el.style.height=ph+'px';el.style.left=Math.max(4,W/2-dollH*.25-pw*.8)+'px'};place();requestAnimationFrame(place)};
+addEventListener('resize',()=>{$$('.petBuddy').forEach(el=>{const h=el.parentElement;if(h&&h.clientHeight)Pet.dom(h,+el.dataset.pct||90)})});
 
 /* objeto do bichinho que segue a boneca (cidade) */
 const PetFollow={x:null,y:null,ph:0,hop:0,dir:1,
