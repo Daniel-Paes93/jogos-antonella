@@ -259,15 +259,15 @@ h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif;margin:0}
 .q{text-align:center;font-family:Fredoka;font-weight:700;font-size:clamp(24px,4vw,36px);margin:4px 0 2px}
 .q2{text-align:center;color:var(--ink2);font-weight:800;font-size:17px;min-height:22px}
 /* memória */
-.mgrid{display:grid;gap:clamp(8px,1.6vw,16px);grid-template-columns:repeat(var(--c),1fr);margin:auto;width:min(100%,calc((100dvh - 150px)*var(--c)/var(--r)*.74))}
+.mgrid{display:grid;gap:12px;margin:0 auto;justify-content:center;--cw:120px}
 .mcard{aspect-ratio:3/4;perspective:800px}
 .mcard .in{position:relative;width:100%;height:100%;transition:transform .45s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d}
 .mcard.open .in,.mcard.ok .in{transform:rotateY(180deg)}
-.mcard .fa,.mcard .ba{position:absolute;inset:0;border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 8px 18px rgba(80,40,140,.18)}
-.mcard .ba{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.35) 0 18%,transparent 19%),repeating-linear-gradient(45deg,#ff7ab6 0 14px,#ff5fa8 14px 28px);display:flex;align-items:center;justify-content:center;font-size:clamp(28px,5vw,48px)}
+.mcard .fa,.mcard .ba{position:absolute;inset:0;border-radius:min(20px,calc(var(--cw)*.16));backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 8px 18px rgba(80,40,140,.18)}
+.mcard .ba{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.35) 0 18%,transparent 19%),repeating-linear-gradient(45deg,#ff7ab6 0 14px,#ff5fa8 14px 28px);display:flex;align-items:center;justify-content:center;font-size:min(48px,calc(var(--cw)*.4))}
 .mcard .fa{background:#fff;transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;padding:8%}
 .mcard .fa img{max-width:100%;max-height:100%;object-fit:contain}
-.mcard .fa img.face{border-radius:16px;width:100%;height:100%;object-fit:cover}
+.mcard .fa img.face{border-radius:min(16px,calc(var(--cw)*.12));width:100%;height:100%;object-fit:cover}
 .mcard.ok .fa{box-shadow:0 0 0 4px #ffd23a,0 8px 18px rgba(80,40,140,.18)}
 /* quebra-cabeça */
 .pz{position:relative;flex:1;min-height:0;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -377,6 +377,16 @@ h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif;margin:0}
 .friendBuddy{position:absolute;bottom:3%;z-index:1;filter:drop-shadow(0 10px 12px rgba(60,20,100,.22));animation:friendIdle 5.5s ease-in-out infinite;transform-origin:50% 100%;cursor:pointer;touch-action:manipulation}
 .friendBuddy.hop{animation:petHop .6s ease-out}
 @keyframes friendIdle{0%,84%,100%{transform:none}89%{transform:rotate(3deg)}94%{transform:rotate(-3deg)}}
+
+/* memória: jogar em 2 */
+.mem2Tog{margin:22px auto 0;display:block;font-family:Fredoka;font-weight:600;font-size:20px;color:#7b3fa0;background:#fff;border-radius:22px;padding:12px 22px;box-shadow:0 6px 16px rgba(80,40,140,.15)}
+.mem2Tog.on{background:#ffe3f1;color:#b0207a;box-shadow:0 0 0 3px #ff7ab6,0 6px 16px rgba(80,40,140,.15)}
+.mem2Bar{display:flex;gap:12px;justify-content:center;margin:0 auto 10px;flex:0 0 auto}
+.mem2Bar .mp{display:flex;flex-direction:row;width:auto;height:auto;line-height:1.2;align-items:center;gap:8px;background:#fff;border-radius:20px;padding:6px 16px;font-family:Fredoka;font-size:20px;color:#7b3fa0;opacity:.55;transition:all .25s;box-shadow:0 4px 12px rgba(80,40,140,.12)}
+.mem2Bar .mp.on{opacity:1;transform:scale(1.08);box-shadow:0 0 0 3px #ffd23a,0 6px 16px rgba(80,40,140,.2)}
+.mem2Bar .mp i{font-style:normal;font-weight:700;background:#ff5fa8;color:#fff;border-radius:12px;min-width:30px;text-align:center;padding:2px 8px}
+@media (max-height:500px){.mem2Bar .mp{font-size:16px;padding:3px 12px}.mem2Tog{margin-top:10px;font-size:17px;padding:8px 16px}}
+.mem2Bar .mp span{font-size:24px;margin:0;color:inherit}.mem2Bar .mp b{color:#7b1f6e}
 
 </style>
 </head>
@@ -1736,23 +1746,44 @@ function btn(cls,html,fn){const b=document.createElement('button');b.className=c
 /* ==== 31_games_learning.js ==== */
 /* ---------------- MEMÓRIA ---------------- */
 GAMES.memory={t:'Memória',en:'Memory',
-  start(a){this.a=a;Play.levels(a,'Quantas cartas?','How many cards?',[{v:4,l:'4',s:'fácil'},{v:6,l:'6'},{v:8,l:'8'},{v:12,l:'12',s:'difícil'}],n=>this.deal(n))},
-  deal(n){this.n=n;const a=this.a;a.innerHTML='';
-    const faces=AVATARS.map(v=>({k:v.id,img:Portrait.url(v.id),face:1,pt:v.name,en:v.name}));
-    const things=ITEMS.filter(i=>['outfit','shoes','bag','head','eyes'].includes(i.slot)).map(i=>({k:i.id,img:i.thumb,pt:i.pt,en:i.en}));
-    const pairs=shuffle([...shuffle(faces).slice(0,3),...shuffle(things)]).slice(0,n/2);
+  start(a){this.a=a;Play.levels(a,'Quantas cartas?','How many cards?',[{v:4,l:'4',s:'fácil'},{v:8,l:'8'},{v:12,l:'12'},{v:20,l:'20'},{v:32,l:'32',s:'difícil'},{v:64,l:'64',s:'32 pares'}],n=>this.deal(n));
+    /* modo "Jogar em 2": a criança e um adulto se revezam, com placar */
+    const t=document.createElement('button');t.className='mem2Tog'+(ST.mem2?' on':'');const lab=()=>t.innerHTML=ST.mem2?'👨‍👧 Jogar em 2: <b>ligado</b>':'👨‍👧 Jogar em 2: <b>desligado</b>';lab();
+    t.onclick=()=>{A();SFX.tap();ST.mem2=!ST.mem2;save();t.classList.toggle('on',!!ST.mem2);lab();talk(ST.mem2?'Vamos jogar juntos! Cada um na sua vez.':'Agora você joga sozinha!',ST.mem2?"Let's play together!":'Playing alone!',true)};
+    a.querySelector('.lvl').appendChild(t)},
+  pool(){const faces=AVATARS.map(v=>({k:v.id,img:Portrait.url(v.id),face:1,pt:v.name,en:v.name}));
+    const pets=(typeof PETS!=='undefined'?PETS:[]).map(p=>({k:'pet_'+p.id,img:p.file,pt:p.pt,en:p.en}));
+    const fr=(typeof FRIENDS!=='undefined'?FRIENDS:[]).map(f=>({k:'fr_'+f.id,img:f.file,pt:f.name,en:f.name}));
+    const things=ITEMS.filter(i=>['outfit','shoes','bag','head','eyes','top','bottom','neck','wrist'].includes(i.slot)).map(i=>({k:i.id,img:i.thumb,pt:i.pt,en:i.en}));
+    return{faces,pets,fr,things}},
+  deal(n){this.n=n;const a=this.a;a.innerHTML='';const P=this.pool(),half=n/2;
+    /* poucas cartas: rostos + roupas; muitas: tudo (rostos, bichinhos, amigos, roupas) — todos os pares diferentes */
+    const pairs=(half<=6?shuffle([...shuffle(P.faces).slice(0,3),...shuffle(P.things)]):shuffle([...P.faces,...P.pets,...P.fr,...shuffle(P.things)].slice(0,Math.max(half,P.faces.length+P.pets.length+P.fr.length)))).slice(0,half);
     this.cards=shuffle([...pairs,...pairs].map((c,i)=>({...c,i})));this.open=[];this.found=0;this.lock=false;
-    let [cols,rows]=n===4?[2,2]:n===6?[3,2]:n===8?[4,2]:[4,3];if(a.clientHeight>a.clientWidth*1.1&&cols>rows)[cols,rows]=[rows,cols]; // em pé: mais linhas, cartas maiores
-    const g=document.createElement('div');g.className='mgrid';g.style.setProperty('--c',cols);g.style.setProperty('--r',rows);a.appendChild(g);a.style.justifyContent='center';
+    this.two=!!ST.mem2;this.turn=0;this.score=[0,0];
+    if(this.two){const bar=document.createElement('div');bar.className='mem2Bar';const kid=ST.name||curAv().name||'Antonella';
+      bar.innerHTML=`<div class="mp p0"><span>👧</span><b>${kid}</b><i>0</i></div><div class="mp p1"><span>🧑</span><b>Papai</b><i>0</i></div>`;a.appendChild(bar);this.bar=bar;this.names=[kid,'Papai'];this.paintTurn()}
+    const g=document.createElement('div');g.className='mgrid';a.appendChild(g);a.style.justifyContent='center';this.g=g;
     this.cards.forEach(c=>{const d=document.createElement('button');d.className='mcard';d.setAttribute('aria-label','carta');d.innerHTML=`<div class="in"><div class="ba">⭐</div><div class="fa"><img class="${c.face?'face':''}" src="${c.img}" alt=""></div></div>`;
       d.onclick=()=>{A();this.flip(c,d)};c.el=d;g.appendChild(d)});
-    talk('Ache os pares iguais!','Find the matching pairs!',true)},
-  flip(c,d){if(this.lock||c.ok||this.open.includes(c))return;d.classList.add('open');SFX.pick();haptic();this.open.push(c);talk(c.pt,c.en===c.pt?'':c.en,true);
+    this.layout();if(!this._rs){this._rs=()=>{if(Play.g===this&&this.g&&this.g.isConnected)this.layout()};addEventListener('resize',this._rs)}
+    talk(this.two?'Ache os pares! Começa '+this.names[0]+'.':'Ache os pares iguais!','Find the matching pairs!',true)},
+  /* escolhe colunas × linhas que deixam as cartas do maior tamanho possível na tela */
+  layout(){const a=this.a,g=this.g,n=this.n;if(!g)return;const cs=getComputedStyle(a),pd=k=>parseFloat(cs[k])||0,bh=this.bar?this.bar.offsetHeight+10:0,W=a.clientWidth-pd('paddingLeft')-pd('paddingRight')-6,H=a.clientHeight-pd('paddingTop')-pd('paddingBottom')-bh-6;if(W<=0||H<=0)return;
+    const gap=n>=32?6:n>=20?9:14;let best={cw:0,c:2,r:2};
+    for(let c=1;c<=n;c++){const r=Math.ceil(n/c);if(c*r-n>=c)continue;const cw=Math.min((W-gap*(c-1))/c,((H-gap*(r-1))/r)*.75);if(cw>best.cw)best={cw,c,r}}
+    const cw=Math.floor(best.cw);g.style.gridTemplateColumns=`repeat(${best.c},${cw}px)`;g.style.gap=gap+'px';g.style.width='auto';g.style.setProperty('--cw',cw+'px');this.dims=[best.c,best.r,cw]},
+  paintTurn(){if(!this.bar)return;this.bar.querySelectorAll('.mp').forEach((e,i)=>{e.classList.toggle('on',i===this.turn);e.querySelector('i').textContent=this.score[i]})},
+  flip(c,d){if(this.lock||c.ok||this.open.includes(c))return;d.classList.add('open');SFX.pick();haptic();this.open.push(c);if(this.n<=20||!this.two)talk(c.pt,c.en===c.pt?'':c.en,true);
     if(this.open.length<2)return;const [x,y]=this.open;this.lock=true;
     if(x.k===y.k){Play.later(()=>{x.ok=y.ok=true;x.el.classList.add('ok');y.el.classList.add('ok');SFX.sparkle();this.found++;this.open=[];this.lock=false;
-        if(this.found===this.n/2)Play.later(()=>Play.win(this.a,'Você achou todos os pares','You found all the pairs!',()=>this.deal(this.n),()=>this.start(this.a)),500);
-        else talk(pick(['Igual!','Achou!','Muito bem!']),pick(['Match!','Great!']),true)},450)}
-    else Play.later(()=>{x.el.classList.remove('open');y.el.classList.remove('open');this.open=[];this.lock=false},1100)},
+        if(this.two){this.score[this.turn]++;this.paintTurn()}
+        if(this.found===this.n/2)Play.later(()=>{if(this.two){const[s0,s1]=this.score,w=s0===s1?'Empate! Os dois jogaram muito bem':s0>s1?this.names[0]+' ganhou com '+s0+' pares':this.names[1]+' ganhou com '+s1+' pares';
+            Play.win(this.a,w,s0===s1?"It's a tie!":'Great game!',()=>this.deal(this.n),()=>this.start(this.a))}
+          else Play.win(this.a,'Você achou todos os pares','You found all the pairs!',()=>this.deal(this.n),()=>this.start(this.a))},500);
+        else talk(this.two?pick(['Achou! Joga de novo, ','Muito bem! De novo, '])+this.names[this.turn]+'!':pick(['Igual!','Achou!','Muito bem!']),pick(['Match!','Great!']),true)},450)}
+    else Play.later(()=>{x.el.classList.remove('open');y.el.classList.remove('open');this.open=[];this.lock=false;
+        if(this.two){this.turn=1-this.turn;this.paintTurn();talk('Agora é a vez de '+this.names[this.turn]+'!',"Next player's turn!",true)}},1100)},
   repeat(){talk('Ache os pares iguais!','Find the matching pairs!',true)}};
 
 /* ---------------- QUEBRA-CABEÇA ---------------- */
