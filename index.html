@@ -697,6 +697,7 @@ h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif;margin:0}
   <img id="splashImg" alt="">
   <h1>Jogos<small>ANTONELLA</small></h1>
   <button class="cta" id="startBtn" style="display:none">▶ Brincar</button>
+  <div id="verTag" style="position:absolute;right:10px;bottom:8px;font:700 14px Nunito,sans-serif;color:#fff;opacity:.85">versão 4.10 · com Restaurante 👩‍🍳</div>
   <div id="loading">Carregando…</div>
 </section>
 
@@ -1511,13 +1512,14 @@ function refreshAvatarUI(){const a=curAv(),u=Portrait.url(a.id);const im=$('#cAv
 
 /* ==== 23_scene_city_movement.js ==== */
 /* =================== CIDADE =================== */
-const City={W:4200,H:1200,GY:700,cv:null,ctx:null,bg:null,cam:0,ready:false,
+const City={W:4800,H:1200,GY:700,cv:null,ctx:null,bg:null,cam:0,ready:false,
   av:{x:400,y:900,tx:400,ty:900,dir:1,ph:0,moving:false,anim:'',at:0},
   pend:null,down:false,hold:0,objs:[],fx:[],flies:[],clouds:[],lastStep:0,lastChirp:0,prev:0,bubbleT:0,
   PL:[
     {id:'salon',x:400,w:440,h:430,c1:'#ffc2de',c2:'#ff8fc3',roof:'arch',awn:['#ff5fa8','#fff'],name:'Salão',en:'Beauty salon',ic:'💄',act:()=>go('salon')},
     {id:'mall',x:1030,w:620,h:500,c1:'#d9c8ff',c2:'#a98cff',roof:'mall',awn:['#8f5bff','#fff'],name:'Shopping',en:'Mall',ic:'🛍️',act:()=>go('mall')},
     {id:'cafe',x:1660,w:420,h:400,c1:'#c5f3e1',c2:'#86dcbb',roof:'cafe',awn:['#2fb88a','#fff'],name:'Cafeteria',en:'Café',ic:'🍦',act:()=>Play.open('cafe')},
+    {id:'resto',x:4500,w:430,h:410,c1:'#ffe7cf',c2:'#ffc089',roof:'resto',awn:['#ff5a4f','#fff'],name:'Restaurante',en:'Restaurant',ic:'👩‍🍳',act:()=>Play.open('resto')},
     {id:'house',x:2250,w:430,h:420,c1:'#fff0b8',c2:'#ffd56a',roof:'tri',awn:null,name:'Casa',en:'Home',ic:'🏠',act:()=>Hub.open('house')},
     {id:'school',x:2860,w:470,h:440,c1:'#cfe9ff',c2:'#93cbff',roof:'tower',awn:['#3a86ff','#fff'],name:'Escola',en:'School',ic:'🎨',act:()=>Hub.open('school')},
     {id:'stage',x:3470,w:500,h:470,c1:'#ffd6e0',c2:'#ffa3bb',roof:'dome',awn:null,name:'Palco',en:'Stage',ic:'🎤',act:()=>Hub.open('stage')},
@@ -1583,6 +1585,10 @@ const City={W:4200,H:1200,GY:700,cv:null,ctx:null,bg:null,cam:0,ready:false,
       x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=4;for(let i=1;i<6;i++){x.beginPath();x.moveTo(L+40+i*(W-80)/6,T+40);x.lineTo(L+40+i*(W-80)/6,GY-140);x.stroke()}
       x.beginPath();x.moveTo(L+40,T+40+(Hh-180)/2);x.lineTo(L+W-40,T+40+(Hh-180)/2);x.stroke();
       ['#ff5fa8','#ffd23a','#3a86ff'].forEach((c,i)=>this.bag(x,L+110+i*80,T+120,c))}
+    if(p.roof==='resto'){x.fillStyle='#ff5a4f';x.fillRect(L-10,T-10,W+20,30);
+      // chapéu de chef gigante
+      x.fillStyle='#fff';x.strokeStyle='#e6d9d2';x.lineWidth=5;[[-48,-96,44],[48,-96,44],[0,-128,54]].forEach(([dx,dy,r])=>{x.beginPath();x.arc(p.x+dx,T+dy,r,0,7);x.fill();x.stroke()});
+      rr(x,p.x-62,T-84,124,74,10);x.fill();x.stroke();x.fillStyle='#fff';x.fillRect(p.x-58,T-100,116,30)}
     if(p.roof==='cafe'){x.fillStyle='#ffb3c7';x.fillRect(L-10,T-10,W+20,30);
       // sorvete gigante
       x.fillStyle='#e8a85b';x.beginPath();x.moveTo(p.x-46,T-60);x.lineTo(p.x+46,T-60);x.lineTo(p.x,T+20);x.fill();
@@ -1630,7 +1636,8 @@ const City={W:4200,H:1200,GY:700,cv:null,ctx:null,bg:null,cam:0,ready:false,
     hold($('#cLeft'),-1);hold($('#cRight'),1);
     $('#cAv').onclick=()=>go('select');$('#cGear').onclick=()=>openGate();$('#cMic').onclick=()=>{A();VoiceCmd.listen()}},
   walkTo(x,y,pend){this.av.tx=Math.max(60,Math.min(this.W-60,x));this.av.ty=Math.max(800,Math.min(1165,y));this.pend=pend||null},
-  goPlace(p){if(p.park){this.walkTo(p.x-80,980);return}this.walkTo(p.x,815,p)},
+  goPlace(p){const far=p.x-this.av.x;if(Math.abs(far)>900){this.av.x=p.x-Math.sign(far)*800;this.av.tx=this.av.x} /* lugar longe: chega rapidinho, sem caminhada comprida */
+    if(p.park){this.walkTo(p.x-80,980);return}this.walkTo(p.x,815,p)},
   hitAv(p){const a=this.av,k=this.depth(a.y),h=430*k;return Math.abs(p.x-a.x)<h*.22&&p.y<a.y+10&&p.y>a.y-h*.9},
   hitPlace(p){if(p.y>this.GY+10)return null;return this.PL.find(b=>!b.park&&Math.abs(p.x-b.x)<b.w/2&&p.y>this.GY-b.h-60)||null},
   hitObj(p){let best=null,bd=1e9;for(const o of this.objs){if(o.t==="friend")continue;let cx=o.x,cy=o.y,r=60;
